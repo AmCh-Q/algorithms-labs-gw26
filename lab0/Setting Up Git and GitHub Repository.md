@@ -2,6 +2,7 @@
 Guide by [AmCh-Q](https://github.com/AmCh-Q) on GitHub.
 
 This is a more in-depth guide compared to ``Git in one minute`` from ``index.md`` focusing more on GitHub and SSH authentication.
+This guide is slightly Windows-focused, if you use a Mac/Linux you can feed this to an LLM for a guide.
 
 ## Goals
 1. Install Git.
@@ -10,8 +11,8 @@ This is a more in-depth guide compared to ``Git in one minute`` from ``index.md`
 4. Learn how to use some Git commands, without using the web interface or desktop apps.
 
 If you have learned these before, just do the following:
-1. Create a GitHub repository ``CSCI-3212``
-2. Within it create a folder ``Lab0`` and a file ``README.md``, and write something in there.
+1. Fork and clone this GitHub repository: https://github.com/Zirikly-teaching/algorithms-labs-gw26
+2. Within it, find the folder ``lab0`` and write your Python scripts.
 
 ## Install Git
 You need this to learn how to maintain a code repository, a place where you will store your classworks.
@@ -39,29 +40,16 @@ ssh-keygen -t ed25519 -C "YourGitHubUserName@users.noreply.github.com" -f ~/.ssh
 It will ask you to create a password. Then you should see ``id_github`` and ``id_github.pub`` at ``C:\Users\YourUserName\.ssh`` if you are using Windows.  
 If you can't find it, see https://docs.github.com/en/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys
 
-Using ``YourGitHubUserName@users.noreply.github.com`` is recommended so you won't accidentally leak your personal/school email, but if you don't mind, you can also set your email to public in your GitHub profile, then you can create the key and later make commits using your own email.
-
 ## Register your SSH private key
 Your local SSH doesn't recognize this new key, so Git can't use it yet, so you need to add your private key:
 ```bash
-eval "$(ssh-agent -s)"
+sc config ssh-agent start= auto && sc start ssh-agent
 ssh-add ~/.ssh/id_github
+ssh-add -l
 ```
-It should ask you for the password you just created, then if it says ``Identity added`` you have successfully added your new key.
-
-### Common Issues if you are using PowerShell instead of Git Bash
-1. Git for Windows often bundles its own ssh.exe and doesn't use the canonical one that gets installed alongside Git, check:
-```bash
-git config --get core.sshCommand
-# If it returns nothing, try setting it:
-git config --global core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe"
-```
-2. You might have trouble starting ``ssh-agent``, launch your powershell in administrator mode and try the following:
-```bash
-Set-Service -Name ssh-agent -StartupType Manual
-Start-Service ssh-agent
-ssh-add "C:\Users\YourUserName\.ssh\id_github"
-```
+The first line starts ``ssh-agent`` service.
+The second line might ask you for the password you just created.  
+The last line verifies that you have added your key.  
 
 ## Upload your SSH public key to GitHub
 
@@ -79,72 +67,90 @@ Once you have done that, try:
 ```bash
 ssh -T git@github.com
 ```
-If it tells you ``You've successfully authenticated, but GitHub does not provide shell access.`` then success! GitHub can now recognize you from your ssh key.
+It might ask you to confirm, enter ``yes``.  
+If it tells you ``You've successfully authenticated, but GitHub does not provide shell access.`` then success! GitHub can now recognize you from your ssh key.  
 
-## Create your class project folder
+## Fork the class GitHub and clone it to your computer
+1. Open our class' GitHub repository: https://github.com/Zirikly-teaching/algorithms-labs-gw26
+2. On the top right, find the button "Fork", click it and follow the prompts to create your own copy of the class repository where you can write however you like.
+3. Your forked repository is now at https://github.com/YourUserName/algorithms-labs-gw26, clone it to your local computer:
 ```bash
-mkdir CSCI-3212
-cd CSCI-3212
+git clone git@github.com:YourUserName/algorithms-labs-gw26.git
+cd algorithms-labs-gw26
 ```
-The first line creates a folder called "CSCI-3212" on your computer, and the second line move you into it.  
-You will use this to store your class projects and assignment submissions.  
+You can use this to store your class projects and assignment submissions.
 
-## Create your Git Repository locally
+**DO NOT** clone ``Zirikly-teaching/algorithms-labs-gw26.git``! That is the class official repository and you won't have access to push changes into it later. Clone your own fork.  
+
+## Set your own identity
+
 ```bash
-git init
-git config user.name "Your Full Name"
-git config user.email "YourGitHubUserName@users.noreply.github.com"
+git config --local user.name "Your Full Name or GitHub username"
+git config --local user.email "YourGitHubUserName@users.noreply.github.com"
 ```
-This turns your folder into a git repository.
+This is so that your commits later knows who you are.
+
+## Add upstream
+
+```bash
+# Sets the class repository as the "upstream"
+git remote add upstream git@github.com:Zirikly-teaching/algorithms-labs-gw26.git
+# Verify
+git remote -v
+```
+So you can do this later:
+```bash
+# If the class repository (upstream) changes
+# you will use these commands to sync the updates to your repository.
+git fetch upstream
+git merge upstream/main
+```
 
 ## Write something
-Go inside ``CSCI-3212``, create a folder ``Lab0``.  
-Go inside ``Lab0``, create a text file ``README.md``, write something in there.  
-Write whatever you want, but know that **other people can see it** later.  
+```bash
+cd lab0
+```
+Within ``lab0`` Write whatever you want, but know that **other people can see it** later.  
 You might want to use this opportunity to create your first python scripts.  
 
 ## Commit it
 ```bash
-git add README.md
+git add -A
 git commit -m "Initial Commit"
 ```
-The first line stages your file (prepares it to be committed).  
-The second line commits it, and gives it a comment.  
-This might feel tedious, but this is necessary for large group projects - each person make their own changes and periodically make a single, bulk commit, so that a team can more effectively track each person's contributions.
+The first line stages all of your newly create files (prepares them to be committed).  
+The second line commits them, as well as all modifications if you have any, and gives the commit a comment.  
+This might feel tedious, but this is necessary for large group projects - each person make their own changes and periodically make a single, bulk commit, so that a team can more effectively track each person's contributions. This also allows us to easily see your work progress.  
 
-## Create a remote repository on GitHub
-1. Go to https://github.com/ and login.
-2. Click the ``+`` on the top right, then ``New Repository``
-3. Use ``CSCI-3212`` as your repository name, don't change anything else.
-4. Click ``Create Repository``
-
-## Push your local repository to GitHub (remote)
-1. Open https://github.com/YourUserName/CSCI-3212/
-2. You should see a line saying ``Quick setup — if you’ve done this kind of thing before``
-3. Right under it there's a "SSH" button, click it.
-4. See the below option ``…or push an existing repository from the command line``
-5. Do as it says inside Git Bash:
+## Push your local changes back to your GitHub
 ```bash
-git remote add origin git@github.com:YourUserName/CSCI-3212.git
-git branch -M main
-git push -u origin main
+git push origin main
 ```
-It might ask you to confirm, enter ``yes``.  
-Once your have done that, refresh your page https://github.com/YourUserName/CSCI-3212/, and you should now see your GitHub repository.
+Once your have done that, refresh your page https://github.com/YourUserName/algorithms-labs-gw26/, and you should see your GitHub repository reflecting your new changes.
 
 ## You are done with the setup!
 
-In the future, you can make any file edits inside the ``CSCI-3212`` folder, then run the following commands to commit your changes locally and push them to GitHub:
+In the future, you can:
+
+0. At anytime, run this to check the status
+```bash
+git status
+```
+1. Use the following to sync your repository to the class repository.
+```bash
+# Ensure you have committed your work before merging upstream changes
+git fetch upstream
+git merge upstream/main
+```
+2. make any file edits inside your ``algorithms-labs-gw26`` folder
+3. commit your changes and push them to GitHub:
 ```bash
 git add -A
-git commit -am "Your commit message"
-git push
+git commit -m "Your commit message"
+git push origin main
 ``` 
-1. The first line adds any file you've newly created (you can skip this if there are no new files).  
-2. The second line commits all files locally; `a` here means ``commit all``, `m` means ``leave a message for the commit``.  
-3. The third line pushes changes to remote (GitHub). 
 Try making some changes then push again.  
 
-Lastly, here are some useful resources:
+## Useful resources:
 1. Git Cheat Sheet: https://git-scm.com/cheat-sheet
-2. gitignore: https://git-scm.com/docs/gitignore. This tells git to ignore some files, useful to avoid accidentally pushing junk or sensitive files - your GitHub repository is public, anyone can read your commits, and there are bad people out there.
+2. gitignore: https://git-scm.com/docs/gitignore. This tells git to ignore some files, useful to avoid accidentally pushing junk or sensitive files - your GitHub repository is public, anyone can read your commits.
