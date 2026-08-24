@@ -4,7 +4,7 @@ Guide by [AmCh-Q](https://github.com/AmCh-Q) on GitHub.
 This is a more in-depth guide compared to ``Git in one minute`` from ``index.md`` focusing more on GitHub and SSH authentication.
 
 ## Goals
-1. Install Git, Python.
+1. Install Git.
 2. Create your own GitHub account and code repository.
 3. Create your own ssh key and connect it to GitHub.
 4. Learn how to use some Git commands, without using the web interface or desktop apps.
@@ -21,15 +21,6 @@ You need this to learn how to maintain a code repository, a place where you will
 git --version
 ```
 You should see something like "git version 2.55.0" -- The exact version don't matter.
-
-## Install Python
-You'd use Python for the class assignments.
-1. Download and install from here: https://www.python.org/downloads/
-2. Open git bash and verify successful installation:
-```bash
-python --version
-```
-You should see something like "Python 3.14.7" -- The exact version don't matter.
 
 ## Create your GitHub account
 
