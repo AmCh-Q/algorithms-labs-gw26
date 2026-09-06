@@ -8,13 +8,29 @@ permalink: /lab2/
 # CSCI 3212 Lab 2: Sorting Traces, Lomuto Partition & Benchmarks, and Array-Backed Binary Trees
 
 In this lab, you will explore three fundamental topics in algorithm design and data structures:
-1. **Bubble Sort and Insertion Sort**: Trace step-by-step logic, loop invariants, comparisons vs. swaps/shifts, and early-stopping optimizations.
-2. **Lomuto Partition Scheme & Quicksort Benchmarks**: Understand pointer mechanics and invariants of Lomuto partitioning, then run experiments comparing runtimes on **1,000,000 randomized arrays** and pathological edge cases across various pivot strategies.
-3. **Representing Binary Trees via Arrays**: Master index arithmetic (0-based and 1-based), parent/child relationships, tree traversals, and binary heap representations without pointers.
+1. **Bubble Sort and Insertion Sort**: Trace step-by-step logic, loop invariants, comparisons vs. swaps/shifts, early-stopping optimizations, and stability.
+2. **Lomuto Partition Scheme & Quicksort Benchmarks**: Understand pointer mechanics and invariants of Lomuto partitioning, trace pointer movements manually, then run experiments comparing runtimes on **1,000,000 randomized arrays** and pathological edge cases across pivot strategies (Last, Random, Median-of-3, Hoare, and 3-Way).
+3. **Representing Binary Trees via Arrays**: Master index arithmetic (0-based and 1-based), parent/child relationships, tree traversals, and complete tree packing without pointers.
 
-## On this page
-1. TOC
-{:toc}
+---
+
+## Lab 2 Checklist & Required Deliverables
+
+All tasks and response areas in this lab are clearly marked with `TODO`. Here is your roadmap:
+
+- [ ] **Part 1: Sorting Traces & Logic**
+  - [ ] **Task 1.1**: Complete the step-by-step Bubble Sort trace table on `[5, 2, 9, 1, 5, 6]`.
+  - [ ] **Task 1.2**: Complete the step-by-step Insertion Sort trace table on `[7, 3, 5, 8, 2]`.
+  - [ ] **Task 1.3**: Answer sorting analysis questions (inversion counting, early exit flag, stability).
+- [ ] **Part 2: Lomuto Partition Trace**
+  - [ ] **Task 2.1**: Complete the Lomuto partition trace table on `[2, 8, 7, 1, 3, 5, 6, 4]`.
+  - [ ] **Task 2.2**: Analyze the duplicate element trap on `[5, 5, 5, 5, 5]`.
+- [ ] **Part 3: Quicksort Benchmarks (1,000,000 Elements & Edge Cases)**
+  - [ ] **Task 3.1**: Run `python benchmark_partition.py` and record execution times in the table.
+  - [ ] **Task 3.2**: Answer edge case analysis questions (sorted, reverse, identical, duplicate keys).
+- [ ] **Part 4: Representing Binary Trees via Arrays**
+  - [ ] **Task 4.1**: Compute manual tree traversals (Pre-order, In-order, Post-order, Level-order) for `[50, 30, 20, 15, 10, 8, 16]`.
+  - [ ] **Task 4.2**: Implement all required functions in `array_tree_practice.py` until all unit tests output `[PASS]`.
 
 ---
 
@@ -43,26 +59,36 @@ def bubble_sort(arr):
 2. **Loop Invariant**: After pass $k$, the suffix `arr[n-k .. n-1]` consists of the $k$ largest elements in the array in their final, sorted positions.
 3. **Early-Stopping Optimization**: The `swapped` boolean flag detects if an entire pass completed without a single swap. If no swaps occurred, the array is already sorted, allowing Bubble Sort to terminate in $O(n)$ time on pre-sorted input.
 
-#### Trace Walkthrough
-Consider the array: `[5, 2, 9, 1, 5, 6]` ($n = 6$).
-
-| Pass | Scanning Range | Comparison ($arr[j]$ vs $arr[j+1]$) | Action | Array State | Sorted Suffix |
-|---|---|---|---|---|---|
-| **1** | $j=0 \dots 4$ | $5 > 2$ | SWAP | `[2, 5, 9, 1, 5, 6]` | |
-| | | $5 \le 9$ | KEEP | `[2, 5, 9, 1, 5, 6]` | |
-| | | $9 > 1$ | SWAP | `[2, 5, 1, 9, 5, 6]` | |
-| | | $9 > 5$ | SWAP | `[2, 5, 1, 5, 9, 6]` | |
-| | | $9 > 6$ | SWAP | `[2, 5, 1, 5, 6, 9]` | `[9]` |
-| **2** | $j=0 \dots 3$ | $2 \le 5$ | KEEP | `[2, 5, 1, 5, 6, 9]` | |
-| | | $5 > 1$ | SWAP | `[2, 1, 5, 5, 6, 9]` | |
-| | | $5 \le 5$ | KEEP | `[2, 1, 5, 5, 6, 9]` | |
-| | | $5 \le 6$ | KEEP | `[2, 1, 5, 5, 6, 9]` | `[6, 9]` |
-| **3** | $j=0 \dots 2$ | $2 > 1$ | SWAP | `[1, 2, 5, 5, 6, 9]` | |
-| | | $2 \le 5$ | KEEP | `[1, 2, 5, 5, 6, 9]` | |
-| | | $5 \le 5$ | KEEP | `[1, 2, 5, 5, 6, 9]` | `[5, 6, 9]` |
-| **4** | $j=0 \dots 1$ | $1 \le 2$ | KEEP | `[1, 2, 5, 5, 6, 9]` | |
-| | | $2 \le 5$ | KEEP | `[1, 2, 5, 5, 6, 9]` | `[5, 5, 6, 9]` |
-| *Exit* | Pass 4 had 0 swaps -> **Early Termination** | | | `[1, 2, 5, 5, 6, 9]` | **Sorted!** |
+{: .exercise }
+> ### Task 1.1: Trace Bubble Sort Logic
+> 
+> Trace Bubble Sort manually on the array: `arr = [5, 2, 9, 1, 5, 6]` ($n = 6$).
+> 
+> Pass 1 is filled in below as a worked example. **Fill in the remaining passes (Pass 2, Pass 3, and Pass 4)** in the table below:
+> 
+> | Pass | Scanning Range | Comparison ($arr[j]$ vs $arr[j+1]$) | Action | Array State | Sorted Suffix |
+> |---|---|---|---|---|---|
+> | **1 (Example)** | $j=0 \dots 4$ | $5 > 2$ | SWAP | `[2, 5, 9, 1, 5, 6]` | |
+> | | | $5 \le 9$ | KEEP | `[2, 5, 9, 1, 5, 6]` | |
+> | | | $9 > 1$ | SWAP | `[2, 5, 1, 9, 5, 6]` | |
+> | | | $9 > 5$ | SWAP | `[2, 5, 1, 5, 9, 6]` | |
+> | | | $9 > 6$ | SWAP | `[2, 5, 1, 5, 6, 9]` | `[9]` |
+> | **2 (TODO)** | $j=0 \dots 3$ | $arr[0]$ vs $arr[1]$: | | | |
+> | | | $arr[1]$ vs $arr[2]$: | | | |
+> | | | $arr[2]$ vs $arr[3]$: | | | |
+> | | | $arr[3]$ vs $arr[4]$: | | `[                      ]` | `[       ]` |
+> | **3 (TODO)** | $j=0 \dots 2$ | $arr[0]$ vs $arr[1]$: | | | |
+> | | | $arr[1]$ vs $arr[2]$: | | | |
+> | | | $arr[2]$ vs $arr[3]$: | | `[                      ]` | `[          ]` |
+> | **4 (TODO)** | $j=0 \dots 1$ | $arr[0]$ vs $arr[1]$: | | | |
+> | | | $arr[1]$ vs $arr[2]$: | | `[                      ]` | `[             ]` |
+> | **Exit** | Did any swaps occur in Pass 4? Explain early stopping: | | | `[                      ]` | **Sorted!** |
+> 
+> ```text
+> Total Comparisons performed: 
+> Total Swaps performed: 
+> ```
+> *(Tip: You can verify your trace by running `python sorting_trace.py`)*
 
 ---
 
@@ -85,76 +111,59 @@ def insertion_sort(arr):
 #### Key Mechanics:
 1. **Loop Invariant**: At the start of iteration $i$, the prefix `arr[0 .. i-1]` contains the original elements from those positions, but in sorted order.
 2. **Inversion Sensitivity**: An inversion is a pair $(i, j)$ such that $i < j$ and $arr[i] > arr[j]$. The total number of shifts in Insertion Sort is **exactly equal** to the number of inversions in the array.
-#### Insertion Sort Trace Walkthrough
-Consider the same array: `[5, 2, 9, 1, 5, 6]` ($n = 6$).
+3. **Adaptive**: If the array is already sorted, each `key` is compared once ($arr[i-1] \le arr[i]$) and 0 shifts occur, yielding an $O(n)$ best-case runtime without needing an extra flag.
 
-| Step $i$ | Key ($arr[i]$) | Comparisons & Shifts | Insertion Action | Array State | Sorted Prefix |
-|---|---|---|---|---|---|
-| **Init** | - | - | Prefix of length 1 is sorted | `[5, 2, 9, 1, 5, 6]` | `[5]` |
-| **$i=1$** | `2` | $5 > 2 \to$ shift $5$ right | Place `2` at index 0 | `[2, 5, 9, 1, 5, 6]` | `[2, 5]` |
-| **$i=2$** | `9` | $5 \le 9 \to$ stop (0 shifts) | Place `9` at index 2 | `[2, 5, 9, 1, 5, 6]` | `[2, 5, 9]` |
-| **$i=3$** | `1` | $9>1, 5>1, 2>1 \to$ shift $9, 5, 2$ | Place `1` at index 0 | `[1, 2, 5, 9, 5, 6]` | `[1, 2, 5, 9]` |
-| **$i=4$** | `5` | $9 > 5 \to$ shift $9$; $5 \le 5 \to$ stop! | Place `5` at index 3 | `[1, 2, 5, 5, 9, 6]` | `[1, 2, 5, 5, 9]` |
-| **$i=5$** | `6` | $9 > 6 \to$ shift $9$; $5 \le 6 \to$ stop! | Place `6` at index 4 | `[1, 2, 5, 5, 6, 9]` | **Sorted!** |
-
-Total Comparisons: **9** &nbsp;|&nbsp; Total Shifts: **6** (equal to the number of inversions!).
+{: .exercise }
+> ### Task 1.2: Trace Insertion Sort Logic
+> 
+> Trace Insertion Sort manually on the array: `arr = [7, 3, 5, 8, 2]` ($n = 5$).
+> 
+> Step $i=1$ is filled in below as a worked example. **Complete Steps $i=2$, $i=3$, and $i=4$**:
+> 
+> | Step $i$ | Key ($arr[i]$) | Comparisons & Shifts | Insertion Action | Resulting Array State | Sorted Prefix |
+> |---|---|---|---|---|---|
+> | **Init** | - | - | Prefix of length 1 is sorted | `[7, 3, 5, 8, 2]` | `[7]` |
+> | **$i=1$ (Example)** | `3` | $7 > 3 \to$ shift $7$ right | Place `3` at index 0 | `[3, 7, 5, 8, 2]` | `[3, 7]` |
+> | **$i=2$ (TODO)** | `5` | | | `[               ]` | `[         ]` |
+> | **$i=3$ (TODO)** | `8` | | | `[               ]` | `[            ]` |
+> | **$i=4$ (TODO)** | `2` | | | `[               ]` | `[               ]` |
+> 
+> ```text
+> Total Comparisons performed: 
+> Total Shifts performed: 
+> ```
 
 ---
 
-### 1.3 Algorithm Stability (Preserving Relative Order)
+### 1.3 Algorithm Stability & Inversions
 
 A sorting algorithm is **stable** if elements with equal keys appear in the output in the same relative order as in the initial input.
-
-* **Bubble Sort is Stable**: In `bubble_sort`, adjacent elements are swapped only when `arr[j] > arr[j + 1]`. If two adjacent elements are equal (`arr[j] == arr[j + 1]`), no swap occurs. Therefore, equal elements never jump past one another.
-* **Insertion Sort is Stable**: In `insertion_sort`, the inner scan continues while `arr[j] > key`. The moment an element equal to the key is encountered (`arr[j] == key`), the loop terminates. The `key` is placed strictly to the *right* of its equal predecessor, preserving original order.
-* **Breaking Stability**: If either comparison is written with a non-strict inequality (`>=`), equal elements will swap past each other, destroying stability!
-
-#### Running the Visual Trace Tool
-We have provided [`lab2/sorting_trace.py`](sorting_trace.py) to trace any array step-by-step:
-```bash
-python sorting_trace.py
-```
+* **Bubble Sort is Stable**: We swap only when `arr[j] > arr[j + 1]`. When `arr[j] == arr[j + 1]`, no swap occurs. Equal elements never cross each other.
+* **Insertion Sort is Stable**: The inner shift loop continues while `arr[j] > key`. When `arr[j] == key`, shifting stops, placing `key` immediately to the right of its equal predecessor.
+* **Breaking Stability**: If either comparison is changed to `>=` instead of `>`, equal elements will swap past each other, destroying stability!
 
 {: .exercise }
-> ### Exercise 1: Tracing & Analysis Questions
+> ### Task 1.3: Sorting Analysis Questions
 > 
 > Answer the following in your lab notes or submission:
 > 
 > ```text
-> TODO 1.1:
-> Trace Insertion Sort manually on arr = [7, 3, 5, 8, 2].
-> For each step i (from 1 to 4), show:
-> - The key being inserted
-> - The elements shifted
-> - The array state after inserting the key
+> TODO 1.3A (Inversions & Shifts):
+> List all inversions (pairs of indices (i, j) where i < j and arr[i] > arr[j])
+> in the initial array [7, 3, 5, 8, 2]:
+> - Inversions: 
+> - Total number of inversions: 
+> - Does this total exactly equal the number of shifts you counted in Task 1.2? (Yes/No): 
 > 
-> Step 1 (key = 3): 
-> Step 2 (key = 5): 
-> Step 3 (key = 8): 
-> Step 4 (key = 2): 
-> 
-> TODO 1.2:
-> How many comparisons and swaps does Bubble Sort perform on a reverse-sorted
-> array of size N (e.g. [5, 4, 3, 2, 1])? Express your answer in terms of N.
-> A:
-> 
-> TODO 1.3:
+> TODO 1.3B (Early Stopping Flag):
 > Why does Bubble Sort require an explicit boolean flag (`swapped`) to achieve
-> O(N) time on sorted data, whereas Insertion Sort naturally achieves O(N) without any flag?
-> A:
+> O(N) best-case time on sorted data, whereas Insertion Sort naturally achieves O(N) without any flag?
+> A: 
 > 
-> TODO 1.4:
-> List all inversions (pairs (i, j) where i < j and arr[i] > arr[j]) in [7, 3, 5, 8, 2].
-> How many total inversions are there? Verify that this number exactly equals the total
-> number of shifts performed in TODO 1.1.
-> Inversions:
-> Total count:
-> Matches shift count (yes/no)?
-> 
-> TODO 1.5:
-> If a student writes Bubble Sort with `if arr[j] >= arr[j + 1]:`, does the algorithm
-> still sort correctly? Does it remain stable? Explain why or why not.
-> A:
+> TODO 1.3C (Stability):
+> If a programmer changes line 33 of Bubble Sort to `if arr[j] >= arr[j + 1]:`,
+> does the algorithm still produce a sorted array? Does it remain stable? Explain why or why not.
+> A: 
 > ```
 
 ---
@@ -198,29 +207,36 @@ At the beginning of each iteration of the `for j` loop, the array is partitioned
 3. If $j \le k \le high - 1$, the relation of $arr[k]$ to $pivot$ is not yet determined.
 4. If $k = high$, $arr[k] = pivot$.
 
-### 2.2 Trace Example (CLRS Classic)
-Trace of `arr = [2, 8, 7, 1, 3, 5, 6, 4]` on `low = 0, high = 7` (Pivot = $4$):
+{: .exercise }
+> ### Task 2.1: Trace Lomuto Partition Scheme
+> 
+> Trace Lomuto partition on `arr = [2, 8, 7, 1, 3, 5, 6, 4]` on range `low = 0, high = 7` (Pivot = $arr[7] = 4$).
+> 
+> The initial state and step $j=0$ are filled in as a guide. **Complete steps $j=1$ through $j=6$ and the final swap**:
+> 
+> | $j$ | $arr[j]$ | $arr[j] \le 4$? | Action (Advance $i$? Swap?) | $i$ | Array State (`arr[0..7]`) | Region $\le 4$ (`arr[low..i]`) | Region $> 4$ (`arr[i+1..j]`) |
+> |---|---|---|---|---|---|---|---|
+> | **Init** | - | - | Initialize $i = low - 1 = -1$ | $-1$ | `[2, 8, 7, 1, 3, 5, 6, 4]` | `[]` | `[]` |
+> | **0 (Ex)** | `2` | Yes ($2 \le 4$) | $i \leftarrow 0$, swap $arr[0]$ with $arr[0]$ | 0 | `[2, 8, 7, 1, 3, 5, 6, 4]` | `[2]` | `[]` |
+> | **1 (TODO)** | `8` | | | | `[                       ]` | | |
+> | **2 (TODO)** | `7` | | | | `[                       ]` | | |
+> | **3 (TODO)** | `1` | | | | `[                       ]` | | |
+> | **4 (TODO)** | `3` | | | | `[                       ]` | | |
+> | **5 (TODO)** | `5` | | | | `[                       ]` | | |
+> | **6 (TODO)** | `6` | | | | `[                       ]` | | |
+> | **End (TODO)**| - | - | Swap $arr[i+1]$ with $arr[high]$: | | `[                       ]` | **Final Pivot Index:** | |
+> 
+> ```text
+> Resulting Left Subarray (<= 4): 
+> Resulting Pivot Index and Value: 
+> Resulting Right Subarray (> 4): 
+> ```
+> *(Tip: You can verify your trace by running `python lomuto_partition.py`)*
 
-| $j$ | $arr[j]$ | $arr[j] \le 4$? | Action | $i$ | Array State (`arr[0..7]`) |
-|---|---|---|---|---|---|
-| Init | - | - | Initialize $i = -1$ | $-1$ | `[2, 8, 7, 1, 3, 5, 6, 4]` |
-| 0 | 2 | Yes | $i \leftarrow 0$, swap $arr[0]$ with $arr[0]$ | 0 | `[2, 8, 7, 1, 3, 5, 6, 4]` |
-| 1 | 8 | No | Do nothing | 0 | `[2, 8, 7, 1, 3, 5, 6, 4]` |
-| 2 | 7 | No | Do nothing | 0 | `[2, 8, 7, 1, 3, 5, 6, 4]` |
-| 3 | 1 | Yes | $i \leftarrow 1$, swap $arr[1]$ with $arr[3]$ | 1 | `[2, 1, 7, 8, 3, 5, 6, 4]` |
-| 4 | 3 | Yes | $i \leftarrow 2$, swap $arr[2]$ with $arr[4]$ | 2 | `[2, 1, 3, 8, 7, 5, 6, 4]` |
-| 5 | 5 | No | Do nothing | 2 | `[2, 1, 3, 8, 7, 5, 6, 4]` |
-| 6 | 6 | No | Do nothing | 2 | `[2, 1, 3, 8, 7, 5, 6, 4]` |
-| **End** | - | - | Swap $arr[i+1]$ with $arr[high]$ ($arr[3] \leftrightarrow arr[7]$) | 3 | `[2, 1, 3, 4, 7, 5, 6, 8]` |
+---
 
-Pivot $4$ is now fixed at index $3$. Subproblems are `arr[0..2]` ($[2, 1, 3]$) and `arr[4..7]` ($[7, 5, 6, 8]$).
+### 2.2 The Fatal Flaw of Lomuto: Duplicate Elements
 
-You can see this logged visually with:
-```bash
-python lomuto_partition.py
-```
-
-### 2.3 The Fatal Flaw of Lomuto: Duplicate Elements
 Look closely at line 6 of Lomuto:
 ```python
 if arr[j] <= pivot:
@@ -228,7 +244,9 @@ if arr[j] <= pivot:
 {: .note }
 > **The All-Identical Trap**: If all elements in the array are identical (e.g., `[5, 5, 5, 5, 5]`), `arr[j] <= pivot` is **always True**!
 > $i$ increments on every single step, and the pivot is swapped into `arr[high]` at the end. The subproblem sizes become $N-1$ and $0$.
-### 2.4 Lomuto vs. Hoare Partition Scheme
+> As a result, Quicksort degrades to $O(N^2)$ time and $O(N)$ recursion depth on arrays with identical elements, even with random pivot selection!
+
+### 2.3 Lomuto vs. Hoare Partition Scheme
 
 In addition to Lomuto's scheme, C.A.R. Hoare's original two-pointer partition algorithm is widely used in production libraries:
 - **Two Inward Pointers**: Pointer $i$ starts at $low - 1$ moving right, while $j$ starts at $high + 1$ moving left. When $arr[i] \ge pivot$ and $arr[j] \le pivot$, they swap.
@@ -239,6 +257,24 @@ Run the comparison demo directly:
 ```bash
 python lomuto_partition.py
 ```
+
+{: .exercise }
+> ### Task 2.2: Lomuto Duplicate Analysis
+> 
+> ```text
+> TODO 2.2A:
+> If arr = [5, 5, 5, 5, 5] is partitioned using Lomuto partition (pivot = 5):
+> - What will the final value of i be at the end of the loop?
+> - What index will the pivot end up at?
+> - What are the sizes of the two recursive subproblems passed to quicksort?
+> A:
+> 
+> TODO 2.2B:
+> Run `python lomuto_partition.py` to view DEMO 3.
+> How does Hoare partition partition the array [5, 5, 5, 5, 5]?
+> What are the resulting subproblem sizes?
+> A:
+> ```
 
 ---
 
@@ -280,12 +316,12 @@ python benchmark_partition.py
 *(For a quick test on smaller sizes, run `python benchmark_partition.py --quick`)*
 
 {: .exercise }
-> ### Exercise 2: Benchmark Observations & Analysis
+> ### Task 3.1 & 3.2: Benchmark Observations & Analysis
 > 
 > Run `benchmark_partition.py` and record the results:
 > 
 > ```text
-> TODO 2.1:
+> TODO 3.1:
 > Record your execution times for N = 1,000,000 random integers (or N = 100,000 with --quick):
 > - Python Timsort:
 > - Lomuto (Random Pivot):
@@ -294,19 +330,19 @@ python benchmark_partition.py
 > - Hoare (Two-Pointer):
 > - 3-Way Quicksort:
 > 
-> TODO 2.2:
+> TODO 3.2A:
 > In the edge case benchmarks:
 > What happens to Lomuto with Last Pivot on an Already Sorted array? Why?
 > How does Random Pivot or Median-of-3 fix this?
 > A:
 > 
-> TODO 2.3:
+> TODO 3.2B:
 > On the "All Identical Elements" scenario:
 > Compare the runtime of Lomuto Quicksort vs. Hoare Quicksort vs. 3-Way Quicksort.
 > Explain why Hoare and 3-Way Quicksort avoid Lomuto's quadratic explosion on identical data.
 > A:
 > 
-> TODO 2.4:
+> TODO 3.2C:
 > Why does standard recursive Quicksort risk crashing with `RecursionError` in Python
 > when sorting large unbalanced arrays, and how does tail-recursion elimination
 > or small-side recursion prevent this?
@@ -376,7 +412,22 @@ python array_tree.py
 ```
 
 {: .exercise }
-> ### Exercise 3: Array Tree Practice Code
+> ### Task 4.1: Manual Tree Traversal Trace
+> 
+> Given the complete binary tree array: `arr = [50, 30, 20, 15, 10, 8, 16]` (0-indexed):
+> 
+> Manually compute and write down the list of elements for each traversal:
+> ```text
+> Pre-Order Traversal  (Root -> Left -> Right): [                                 ]
+> In-Order Traversal   (Left -> Root -> Right): [                                 ]
+> Post-Order Traversal (Left -> Right -> Root): [                                 ]
+> Level-Order Traversal (Breadth-First):        [                                 ]
+> Is this array a valid Max-Heap? (Yes/No):     [     ]
+> ```
+> *(Tip: Verify your answers by running `python array_tree.py`)*
+
+{: .exercise }
+> ### Task 4.2: Array Tree Practice Code
 > 
 > Open [`lab2/array_tree_practice.py`](array_tree_practice.py) and complete the TODOs:
 > 1. **Exercise 1 (0-Based)**: Implement `left_child_0`, `right_child_0`, `parent_0`.
@@ -397,9 +448,9 @@ python array_tree.py
 ## Lab Files Summary
 
 All files for this lab are located in the `lab2/` directory:
+- [`README.md`](README.md): Lab instructions, trace worksheets, analysis questions, and checklists.
 - [`sorting_trace.py`](sorting_trace.py): Step-by-step visual trace utility for Bubble and Insertion Sort with comparison/swap metrics.
 - [`lomuto_partition.py`](lomuto_partition.py): Traceable Lomuto and Hoare partitioning with pointer step logs, pivot strategies, and duplicate handling demo.
 - [`benchmark_partition.py`](benchmark_partition.py): Full benchmark suite for 1,000,000 randomized integers, pivot strategies, edge cases, and copy-paste Markdown table generation.
 - [`array_tree.py`](array_tree.py): `ArrayBinaryTree` class, 0-based/1-based indexing, traversals, and ASCII visualizer.
 - [`array_tree_practice.py`](array_tree_practice.py): Student practice exercises (index math, bounds safety, heap validation, in-order traversal, and sift-down challenge) with automated test suite.
-
