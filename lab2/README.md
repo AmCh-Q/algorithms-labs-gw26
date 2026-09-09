@@ -2,7 +2,6 @@
 layout: default
 title: Lab 2
 nav_order: 3
-permalink: /lab2/
 ---
 
 # CSCI 3212 Lab 2: Sorting Traces, Lomuto Partition & Benchmarks, and Array-Backed Binary Trees
@@ -59,7 +58,6 @@ def bubble_sort(arr):
 2. **Loop Invariant**: After pass $k$, the suffix `arr[n-k .. n-1]` consists of the $k$ largest elements in the array in their final, sorted positions.
 3. **Early-Stopping Optimization**: The `swapped` boolean flag detects if an entire pass completed without a single swap. If no swaps occurred, the array is already sorted, allowing Bubble Sort to terminate in $O(n)$ time on pre-sorted input.
 
-{: .exercise }
 > ### Task 1.1: Trace Bubble Sort Logic
 > 
 > Trace Bubble Sort manually on the array: `arr = [5, 2, 9, 1, 5, 6]` ($n = 6$).
@@ -113,7 +111,6 @@ def insertion_sort(arr):
 2. **Inversion Sensitivity**: An inversion is a pair $(i, j)$ such that $i < j$ and $arr[i] > arr[j]$. The total number of shifts in Insertion Sort is **exactly equal** to the number of inversions in the array.
 3. **Adaptive**: If the array is already sorted, each `key` is compared once ($arr[i-1] \le arr[i]$) and 0 shifts occur, yielding an $O(n)$ best-case runtime without needing an extra flag.
 
-{: .exercise }
 > ### Task 1.2: Trace Insertion Sort Logic
 > 
 > Trace Insertion Sort manually on the array: `arr = [7, 3, 5, 8, 2]` ($n = 5$).
@@ -142,7 +139,6 @@ A sorting algorithm is **stable** if elements with equal keys appear in the outp
 * **Insertion Sort is Stable**: The inner shift loop continues while `arr[j] > key`. When `arr[j] == key`, shifting stops, placing `key` immediately to the right of its equal predecessor.
 * **Breaking Stability**: If either comparison is changed to `>=` instead of `>`, equal elements will swap past each other, destroying stability!
 
-{: .exercise }
 > ### Task 1.3: Sorting Analysis Questions
 > 
 > Answer the following in your lab notes or submission:
@@ -207,7 +203,6 @@ At the beginning of each iteration of the `for j` loop, the array is partitioned
 3. If $j \le k \le high - 1$, the relation of $arr[k]$ to $pivot$ is not yet determined.
 4. If $k = high$, $arr[k] = pivot$.
 
-{: .exercise }
 > ### Task 2.1: Trace Lomuto Partition Scheme
 > 
 > Trace Lomuto partition on `arr = [2, 8, 7, 1, 3, 5, 6, 4]` on range `low = 0, high = 7` (Pivot = $arr[7] = 4$).
@@ -258,7 +253,6 @@ Run the comparison demo directly:
 python lomuto_partition.py
 ```
 
-{: .exercise }
 > ### Task 2.2: Lomuto Duplicate Analysis
 > 
 > ```text
@@ -315,7 +309,6 @@ python benchmark_partition.py
 ```
 *(For a quick test on smaller sizes, run `python benchmark_partition.py --quick`)*
 
-{: .exercise }
 > ### Task 3.1 & 3.2: Benchmark Observations & Analysis
 > 
 > Run `benchmark_partition.py` and record the results:
@@ -411,7 +404,6 @@ Explore the reference implementation and visualizer in [`lab2/array_tree.py`](ar
 python array_tree.py
 ```
 
-{: .exercise }
 > ### Task 4.1: Manual Tree Traversal Trace
 > 
 > Given the complete binary tree array: `arr = [50, 30, 20, 15, 10, 8, 16]` (0-indexed):
@@ -426,7 +418,6 @@ python array_tree.py
 > ```
 > *(Tip: Verify your answers by running `python array_tree.py`)*
 
-{: .exercise }
 > ### Task 4.2: Array Tree Practice Code
 > 
 > Open [`lab2/array_tree_practice.py`](array_tree_practice.py) and complete the TODOs:
