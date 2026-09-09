@@ -31,7 +31,8 @@ Lomuto partitioning only.
 - [ ] Run all three practice files and resolve all failed checks.
 
 Keep the function names and parameters unchanged. Do not use `sorted`,
-`list.sort`, or `heapq` to implement the required functions. 
+`list.sort`, or `heapq` to implement the required functions. The provided checks
+use `sorted` only to verify results.
 
 ## Part 1: Bubble Sort and Insertion Sort
 
@@ -135,10 +136,6 @@ time if you remove its early-exit check?
 **TODO 1.3B:** Why do the strict `>` comparisons preserve stability? If Bubble
 Sort uses `>=` instead, does it still sort correctly? Is it still stable? Use
 `[5A, 5B]` to explain.
-
-**Optional:** An inversion is a pair of indices `(i, j)` with `i < j` and
-`arr[i] > arr[j]`. List the inversions of `[7, 3, 5, 8, 2]` and compare their
-count with your shift count.
 
 ## Part 2: Lomuto Partition and Quicksort
 
@@ -292,9 +289,9 @@ The provided list-based version uses O(n) peak auxiliary space.
 ## Part 4: Array-Based Heaps and Heapsort
 
 A binary heap is a **complete binary tree**: every level except possibly the
-last is full, and the last level fills from left to right. In a **max-heap**,
-each parent is at least as large as its children. The root is therefore a
-maximum, but the array itself need not be sorted.
+last is full, and the last level fills from left to right. In a **min-heap**,
+each parent is at most as large as its children. The root is therefore a
+minimum, but the array itself need not be sorted.
 
 Store the tree in level order in a list. This lab uses 0-based indices only.
 
@@ -310,65 +307,67 @@ The root has no parent; do not apply the parent formula to it.
 
 ### 4.1 Read an array as a heap
 
-For `[50, 30, 20, 15, 10, 8, 16]`, the levels are:
+For `[4, 10, 8, 30, 15, 20, 16]`, the levels are:
 
 | Level | Indices | Values |
 |---|---|---|
-| 0 | 0 | 50 |
-| 1 | 1, 2 | 30, 20 |
-| 2 | 3, 4, 5, 6 | 15, 10, 8, 16 |
+| 0 | 0 | 4 |
+| 1 | 1, 2 | 10, 8 |
+| 2 | 3, 4, 5, 6 | 30, 15, 20, 16 |
 
 **TODO 4.1:** Find the child indices and values of index 1, the parent index and
-value of index 6, and all leaf indices. Is this a max-heap? Explain using the
+value of index 6, and all leaf indices. Is this a min-heap? Explain using the
 parent-child comparisons, not whether the list looks sorted.
 
 ### 4.2 Restore the heap with sift-down
 
-Sift-down repairs a node that may be smaller than one of its children.
-**Its child subtrees must already be max-heaps.** Compare the current node
-with its existing children. If a child is larger, swap with the larger child
+Sift-down repairs a node that may be larger than one of its children.
+**Its child subtrees must already be min-heaps.** Compare the current node
+with its existing children. If a child is smaller, swap with the smaller child
 and continue from that child's index. Stop when no swap is needed.
 
 ```text
-MAX-HEAPIFY-DOWN(arr, i, heap_size)
+MIN-HEAPIFY-DOWN(arr, i, heap_size)
   repeat
-    largest = i
+    smallest = i
     left = 2 * i + 1
     right = 2 * i + 2
-    if left < heap_size and arr[left] > arr[largest]
-      largest = left
-    if right < heap_size and arr[right] > arr[largest]
-      largest = right
-    if largest == i
+    if left < heap_size and arr[left] < arr[smallest]
+      smallest = left
+    if right < heap_size and arr[right] < arr[smallest]
+      smallest = right
+    if smallest == i
       stop
-    swap arr[i] with arr[largest]
-    i = largest
+    swap arr[i] with arr[smallest]
+    i = smallest
 ```
 
-**TODO 4.2A:** Trace sift-down on `[4, 30, 20, 15, 10, 8, 16]`, starting at
+**TODO 4.2A:** Trace sift-down on `[25, 10, 8, 30, 15, 20, 16]`, starting at
 `i = 0`, with `heap_size = 7`. Record each swap and resulting array. Explain
-why the larger child must be chosen, and why the process stops.
+why the smaller child must be chosen, and why the process stops.
 
-**TODO 4.2B:** Implement `max_heapify_down` in `heapsort_practice.py`. Modify the
+**TODO 4.2B:** Implement `min_heapify_down` in `heapsort_practice.py`. Modify the
 list in place and return `None`. The suffix starting at `heap_size` is outside
 the heap and must remain unchanged.
 
 ### 4.3 Build the heap and sort
 
 Leaves are already one-node heaps. The last internal node has index
-`len(arr) // 2 - 1`. The provided `build_max_heap` works backward from that node
+`len(arr) // 2 - 1`. The provided `build_min_heap` works backward from that node
 to the root, using your sift-down function. That order ensures each node's
 child subtrees are already heaps when it is processed.
 
-Heapsort first builds a max-heap, then repeatedly moves the maximum into its
-final position at the end of the active heap.
+Heapsort first builds a min-heap, then repeatedly moves the minimum into its
+final position at the end of the active heap. **This version produces
+descending order:** the smallest value goes into the last position, the next
+smallest goes immediately before it, and so on.
 
 ```text
 HEAP-SORT(arr)
-  BUILD-MAX-HEAP(arr)
+  BUILD-MIN-HEAP(arr)
   for end from length(arr) - 1 down through 1
     swap arr[0] with arr[end]
-    MAX-HEAPIFY-DOWN(arr, 0, end)
+    MIN-HEAPIFY-DOWN(arr, 0, end)
   return arr
 ```
 
@@ -377,13 +376,13 @@ After the swap, `end` is the new heap size: active indices are `0` through
 shrink.** Do not remove elements from the list.
 
 **TODO 4.3A:** Complete the loop body in `heap_sort`. It should sort the original
-list in ascending order and return that same list object.
+list in descending order and return that same list object.
 
 ```bash
 python3 heapsort_practice.py
 ```
 
-**TODO 4.3B:** Starting with the max-heap `[50, 30, 20, 15, 10, 8, 16]`, perform
+**TODO 4.3B:** Starting with the min-heap `[4, 10, 8, 30, 15, 20, 16]`, perform
 one Heapsort extraction: swap the root with the last active element, reduce
 the active heap size, and sift down. Record the full array, active heap size,
 and sorted suffix afterward. Why must sift-down exclude that suffix?
